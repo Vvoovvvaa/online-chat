@@ -4,9 +4,9 @@ export class Base {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @CreateDateColumn({ name: 'created_at', type: 'datetime' })    //Poxelu e sik jamanakavorn e dracc
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp without time zone' })
   createdAt: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })  // esel hetn poxel db i dzveluc hedo
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp without time zone' })
   updatedAt: Date;
 }

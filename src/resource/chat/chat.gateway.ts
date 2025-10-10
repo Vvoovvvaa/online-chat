@@ -7,9 +7,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Server, Socket } from 'socket.io';
+import { Injectable } from '@nestjs/common';
+import { Server,WebSocket } from "ws"
+
 import { ChatService } from './chat.service';
-import { Injectable, UseGuards } from '@nestjs/common';
 import { WsAuthGuard } from 'src/guards/ws-auth-guard';
 import type { Message } from './types/message';
 
@@ -20,13 +21,13 @@ import type { Message } from './types/message';
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(private readonly chatService: ChatService) { }
 
   @WebSocketServer()
   server: Server;
 
   // @UseGuards(WsAuthGuard)
-  handleConnection(@ConnectedSocket() client: Socket) {
+  handleConnection(@ConnectedSocket() client: WebSocket) {
     if (!this.chatService.getClientById(client.id)) {
       this.chatService.addClient(client);
     }
@@ -34,13 +35,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
   // @UseGuards(WsAuthGuard)
   @SubscribeMessage('message')
-  handleMessage(@ConnectedSocket() client: Socket, @MessageBody() message: Message): void {
+  handleMessage(@ConnectedSocket() client: WebSocket, @MessageBody() message: Message): void {
     console.log(`Message from ${client.id}:`, message);
     this.chatService.broadcastMessage('message', {
       ...message,
     })
   }
-  handleDisconnect(@ConnectedSocket() client: Socket) {
+  handleDisconnect(@ConnectedSocket() client: WebSocket) {
     console.log('Client disconnected:', client.id);
   }
 }
