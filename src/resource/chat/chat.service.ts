@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Chat, Message, User } from '../../entities';
 import { AuthenticatedWebSocket } from './types/authenticated-websocket';
-import { ChatType } from '../../entities';
 
 @Injectable()
 export class ChatService {
@@ -84,15 +83,23 @@ export class ChatService {
     return savedMessage;
   }
 
-  broadcastToChat(chatId: number, payload: any) {
-    this.chatRepo.findOne({ where: { id: chatId }, relations: ['members'] }).then((chat) => {
-      if (!chat) return;
-      chat.members.forEach((member) => {
-        const client = this.clients.get(member.id);
-        if (client && client.readyState === client.OPEN) {
-          client.send(JSON.stringify(payload));
-        }
+  broadcastToChat(chatOrId: number | Chat, payload: any) {
+    if (typeof chatOrId === 'number') {
+      this.chatRepo.findOne({ where: { id: chatOrId }, relations: ['members'] }).then((chat) => {
+        if (!chat) return;
+        this.sendToMembers(chat.members, payload);
       });
+    } else {
+      this.sendToMembers(chatOrId.members, payload);
+    }
+  }
+
+  private sendToMembers(members: User[], payload: any) {
+    members.forEach((member) => {
+      const client = this.clients.get(member.id);
+      if (client && client.readyState === client.OPEN) {
+        client.send(JSON.stringify(payload));
+      }
     });
   }
 }
