@@ -1,19 +1,30 @@
-import { Entity, Column, OneToMany } from 'typeorm';
-import { Base } from './base';
-import { ChatMember } from './chat-members';
+import { Entity, Column, ManyToMany, JoinTable, OneToMany, ManyToOne } from 'typeorm';
+import { User } from './user';
 import { Message } from './message';
+import { Base } from './base';
 
-@Entity('chats')
+export enum ChatType {
+  PRIVATE = 'private',
+  GROUP = 'group',
+}
+
+@Entity()
 export class Chat extends Base {
-  @Column({ nullable: true })
+  @Column()
   name: string;
 
-  @Column({ default: false })
-  isGroup: boolean;
+  @Column()
+  @ManyToOne(()  => User,(user) => user.id)
+  ownerId: number;
+  
 
-  @OneToMany(() => ChatMember, (m) => m.chat, { cascade: true })
-  members: ChatMember[];
+  @Column({ type: 'enum', enum: ChatType, default: ChatType.PRIVATE })
+  type: ChatType;
 
-  @OneToMany(() => Message, (m) => m.chat)
+  @ManyToMany(() => User, (user) => user.chats)
+  @JoinTable()
+  members: User[];
+
+  @OneToMany(() => Message, (message) => message.chat, { cascade: true })
   messages: Message[];
 }

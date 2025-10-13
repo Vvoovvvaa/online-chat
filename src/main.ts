@@ -1,27 +1,18 @@
-import 'dotenv/config';
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-// import { RedisIoAdapter } from './resource/chat/redis';
-
-const PORT = process.env.PORT || 3000
+import { CustomWsAdapter } from './modules/ws.adapter';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // const redisIoAdapter = new RedisIoAdapter(app)
-  // await redisIoAdapter.connectToRedis()
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(
-    app.get(Reflector)
-  ))
-  app.useGlobalPipes(new ValidationPipe({
-    transform: true,
-    transformOptions: {
-      enableImplicitConversion: true,
-    },
-  }))
-  // app.useWebSocketAdapter(redisIoAdapter)
-  await app.listen(+PORT);
-  console.log("App running on port - ", PORT)
+  const logger = new Logger('Bootstrap');
 
+  app.useWebSocketAdapter(new CustomWsAdapter(app));
+
+  const port = 2221;
+  await app.listen(port);
+
+  console.log(`App running on port ${port}`);
 }
+
 bootstrap();

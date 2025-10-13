@@ -1,23 +1,22 @@
-import { Entity, Column, OneToMany } from 'typeorm';
-
-import { Base } from './base';
-import { ChatMember } from './chat-members';
+import { Entity, Column, OneToMany, ManyToMany } from 'typeorm';
+import { Chat } from './chat';
 import { Message } from './message';
+import { Base } from './base';
 
-@Entity('users')
+@Entity()
 export class User extends Base {
-  @Column({ nullable: true })
+  @Column()
   name: string;
-
-  @Column({ nullable: true })
-  lastName: string;
 
   @Column({ unique: true })
   phone: string;
 
-  @OneToMany(() => ChatMember, (m) => m.user)
-  chatMemberships: ChatMember[];
+  @ManyToMany(() => Chat, (chat) => chat.members)
+  chats: Chat[];
 
-  @OneToMany(() => Message, (m) => m.sender)
+  @OneToMany(() => Message, (message) => message.user)
   messages: Message[];
+
+  secretCodes: any;
+
 }

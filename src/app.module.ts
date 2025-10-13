@@ -1,31 +1,48 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { join } from 'path';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { jwtConfig, dbconfig } from './configs';
+import { validationSchema } from './validation/validation-schema';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ChatModule } from './resource/chat/chat.module';
+import { Chat, Message, SecretCode, User } from './entities';
+import { IDBConfig } from './models';
 import { AuthModule } from './resource/auth/auth.module';
-import { User } from './entities/user';
-import { Base } from './entities/base';
-import { Message } from './entities/message';
-import { ChatMember } from './entities/chat-members';
-import { Chat } from './entities/chat';
 
 @Module({
   imports: [
-       TypeOrmModule.forRoot({
-         type: 'postgres',
-         host: process.env.DATABASE_HOST,
-         port: +(process.env.DATABASE_PORT as string),
-         username: process.env.DATABASE_USER,
-         password: process.env.DATABASE_PASSWORD,
-         database: process.env.DATABASE_NAME,
-         entities: [User,Base,Message,ChatMember,Chat],
-         synchronize: true,
-       }),
-    TypeOrmModule.forFeature([User, Base,Message,ChatMember,Chat]),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads/'),
+      serveRoot: '/public/',
+    }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+      validationSchema: validationSchema,
+      load: [jwtConfig, dbconfig],
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const dbConfig: IDBConfig = configService.get('DB_CONFIG') as IDBConfig;
+        return {
+          type: 'postgres',
+          host: dbConfig.host,
+          port: dbConfig.port,
+          username: dbConfig.username,
+          password: dbConfig.password,
+          database: dbConfig.database,
+          entities: [User, SecretCode, Chat, Message ],
+          synchronize: true,
+        };
+      },
+    }),
     ChatModule,
-    AuthModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

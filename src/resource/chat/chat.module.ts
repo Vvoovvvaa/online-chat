@@ -1,13 +1,15 @@
 import { Module } from '@nestjs/common';
 import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
-import { WsAuthGuard } from 'src/guards/ws-auth-guard';
-import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from '../auth/auth.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Chat, Message, SecretCode, User } from 'src/entities';
 import { ChatController } from './chat.controller';
 
 @Module({
-  imports: [JwtModule.register({ secret: process.env.JWT_SECRET })],
-  providers: [ChatGateway, ChatService, WsAuthGuard],
-  controllers: [ChatController],
+  imports: [TypeOrmModule.forFeature([Chat, Message, User, SecretCode])
+,AuthModule],
+  providers: [ChatGateway, ChatService],
+  controllers:[ChatController]
 })
 export class ChatModule {}

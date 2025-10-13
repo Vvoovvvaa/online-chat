@@ -1,6 +1,6 @@
 import { IsPhoneNumber, IsString, MaxLength, MinLength } from "class-validator";
 
-export class AuthDTO{
+export class CreateAuthDTO{
     @IsPhoneNumber()
     phone:string
 

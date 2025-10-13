@@ -1,17 +1,16 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
-
-import { Base } from './base';
 import { Chat } from './chat';
 import { User } from './user';
+import { Base } from './base';
 
-@Entity('messages')
+@Entity()
 export class Message extends Base {
-  @ManyToOne(() => Chat, (c) => c.messages, { onDelete: 'CASCADE' })
+  @Column()
+  text: string;
+
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  user: User;
+
+  @ManyToOne(() => Chat, (chat) => chat.messages, { onDelete: 'CASCADE' })
   chat: Chat;
-
-  @ManyToOne(() => User, (u) => u.messages, { eager: true })
-  sender: User;
-
-  @Column('text')
-  content: string;
 }

@@ -1,41 +1,98 @@
-import { WebSocket } from 'ws';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Chat, Message, User } from '../../entities';
+import { AuthenticatedWebSocket } from './types/authenticated-websocket';
+import { ChatType } from '../../entities';
 
+@Injectable()
 export class ChatService {
-  private clients: Map<string, WebSocket> = new Map();
+  [x: string]: any;
+  private clients = new Map<number, AuthenticatedWebSocket>();
 
-  addClient(client: WebSocket): void {
-    if (!this.clients.has(client.id)) {
-      this.clients.set(client.id, client);
-      console.log(`Client connected: ${client.id}`);
-      console.log(`Total connected: ${this.clients.size}`);
+  constructor(
+    @InjectRepository(Chat)
+    private readonly chatRepo: Repository<Chat>,
+    @InjectRepository(Message)
+    private readonly messageRepo: Repository<Message>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+  ) { }
+
+  addClient(userId: number, socket: AuthenticatedWebSocket) {
+    this.clients.set(userId, socket);
+  }
+
+  removeClient(userId: number) {
+    this.clients.delete(userId);
+  }
+
+  async createChat(ownerId: number, name: string, type?,): Promise<Chat> {
+    const owner = await this.userRepo.findOne({ where: { id: ownerId } });
+    if (!owner) throw new Error('User not found');
+
+    const chat = this.chatRepo.create({
+      name,
+      ownerId,
+      type,
+      members: [owner],
+    });
+
+    return this.chatRepo.save(chat);
+  }
+
+  async inviteUser(inviterId: number, chatId: number, userId: number): Promise<boolean> {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      relations: ['members'],
+    });
+    if (!chat || chat.ownerId !== inviterId) return false;
+
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) return false;
+
+    if (!chat.members.find((m) => m.id === userId)) {
+      chat.members.push(user);
+      await this.chatRepo.save(chat);
     }
+
+    return true;
   }
 
-  removeClient(id: string): void {
-    this.clients.delete(id);
-    console.log(`Client disconnected: ${id}`);
-    console.log(`Total connected: ${this.clients.size}`);
-  }
+  async addMessage(userId: number, chatId: number, text: string) {
+    const chat = await this.chatRepo.findOne({
+      where: { id: chatId },
+      relations: ['members', 'messages'],
+    });
 
-  getClients(): WebSocket[] {
-    return Array.from(this.clients.values());
-  }
-
-  getClientById(id: string): WebSocket | null {
-    return this.clients.get(id) ?? null;
-  }
-
-  broadcastMessage(event: string, data: any): void {
-    const payload = JSON.stringify({ event, data });
-    for (const client of this.clients.values()) {
-      client.send(payload);
+    if (!chat || !chat.members.find((m) => m.id === userId)) {
+      throw new NotFoundException('Chat not found or user not a member');
+    };
+    if (!text || !text.trim()) {
+      throw new Error('Message text cannot be empty');
     }
+
+
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) return null;
+
+    const message = this.messageRepo.create({ text, user, chat });
+    const savedMessage = await this.messageRepo.save(message);
+
+    this.broadcastToChat(chat.id, { event: 'message', data: savedMessage });
+
+    return savedMessage;
   }
 
-  sendToClient(clientId: string, event: string, data: any): void {
-    const client = this.getClientById(clientId);
-    if (client) {
-      client.send(JSON.stringify({ event, data }));
-    }
+  broadcastToChat(chatId: number, payload: any) {
+    this.chatRepo.findOne({ where: { id: chatId }, relations: ['members'] }).then((chat) => {
+      if (!chat) return;
+      chat.members.forEach((member) => {
+        const client = this.clients.get(member.id);
+        if (client && client.readyState === client.OPEN) {
+          client.send(JSON.stringify(payload));
+        }
+      });
+    });
   }
 }

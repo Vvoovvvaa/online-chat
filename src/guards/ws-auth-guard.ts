@@ -1,31 +1,61 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Logger,
+} from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { Socket } from 'socket.io';
+import { IJWTConfig } from 'src/models';
 
 @Injectable()
 export class WsAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  private readonly logger = new Logger(WsAuthGuard.name);
+  private readonly jwtConfig: IJWTConfig;
 
-  canActivate(context: ExecutionContext): boolean {
-    const client: Socket = context.switchToWs().getClient();
-    const token = this.extractTokenFromHandshake(client);
-
-    if (!token) throw new UnauthorizedException('Missing access token');
-
-    try {
-      const payload = this.jwtService.verify(token, { secret: process.env.JWT_SECRET });
-      (client as any).user = payload;
-      return true;
-    } catch (err) {
-      throw new UnauthorizedException('Invalid or expired token');
-    }
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {
+    const config = this.configService.get<IJWTConfig>('JWT_CONFIG');
+    if (!config) throw new Error('JWT_CONFIG not found in ConfigService');
+    this.jwtConfig = config;
   }
 
-  private extractTokenFromHandshake(client: Socket): string | null {
-    const authHeader = client.handshake.headers.authorization;
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const client = context.switchToWs().getClient<any>();
+    const token = client?.token;
 
-    if (!authHeader) return null;
-    const [type, token] = authHeader.split(' ');
-    return type === 'Bearer' ? token : null;
+    if (!token) {
+      this.logger.warn('Токен не передан при подключении');
+      throw new WsException('Token not provided');
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.jwtConfig.secret,
+      });
+
+      if (!payload?.sub) {
+        this.logger.warn('Payload токена неполный');
+        throw new WsException('Invalid token payload');
+      }
+
+      client.user = {
+        id: payload.sub,
+        name: payload.name,
+        phone: payload.phone,
+      };
+
+      this.logger.log(
+        `WebSocket авторизован: ${client.user.name} (${client.user.id})`,
+      );
+
+      return true;
+    } catch (err) {
+      this.logger.warn('Неверный токен — ' + err.message);
+      throw new WsException('Invalid or expired token');
+    }
   }
 }

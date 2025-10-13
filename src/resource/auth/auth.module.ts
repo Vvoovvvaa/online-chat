@@ -1,21 +1,37 @@
+
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+
+import { SecretCode, User } from '../../entities';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtModule } from '@nestjs/jwt';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/entities/user';
+import { AuthGuard } from '../../guards';
+
 
 @Module({
-    controllers: [AuthController],
-    providers: [AuthService],
-    imports: [
-        TypeOrmModule.forFeature([User]),
-        JwtModule.register({
-            global: true,
-            secret: process.env.JWT_SECRET,
-            signOptions: { expiresIn: '1d' }
-        })
-    ]
+  imports: [
+    TypeOrmModule.forFeature([User, SecretCode]),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_TEMP_SECRET'),
+        signOptions: { expiresIn: '10m' },
+      }),
+    }),
+  ],
+  providers: [AuthService, AuthGuard],
+  controllers: [AuthController],
+  exports: [AuthService, JwtModule],
 })
-export class AuthModule { }
-
+export class AuthModule {}
