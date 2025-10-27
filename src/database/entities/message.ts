@@ -1,7 +1,5 @@
 import { Entity, Column, ManyToOne } from 'typeorm';
-import { Chat } from './chat';
-import { User } from './user';
-import { Base } from './base';
+import { Chat,User,Base } from '.';
 
 @Entity()
 export class Message extends Base {

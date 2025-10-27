@@ -1,6 +1,5 @@
 import { Column, Entity, ManyToOne } from "typeorm";
-import { Base } from "./base";
-import { User } from "./user";
+import { Base,User } from ".";
 
 @Entity()
 export class SecretCode extends Base{

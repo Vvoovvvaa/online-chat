@@ -1,7 +1,7 @@
 import { Body, Controller, Post, UseGuards} from '@nestjs/common';
 
 import { CreateAuthDTO } from './dto/auth-dto';
-import { CodeDTO } from './dto/chech-code.dto';
+import { CodeDTO } from './dto/check-code.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../../guards';
 

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Chat, Message, User } from '../../entities';
+import { Chat, Message, User } from '../../database/entities';
 import { AuthenticatedWebSocket } from './types/authenticated-websocket';
 
 @Injectable()

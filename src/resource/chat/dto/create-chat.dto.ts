@@ -1,5 +1,5 @@
 import { IsString, MinLength, MaxLength, IsOptional, IsEnum } from "class-validator";
-import { ChatType } from "src/entities";
+import { ChatType } from "src/database/entities";
 
 export class CreateChatDTO {
   @IsString()

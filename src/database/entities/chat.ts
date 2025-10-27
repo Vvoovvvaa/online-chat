@@ -1,7 +1,5 @@
 import { Entity, Column, ManyToMany, JoinTable, OneToMany, ManyToOne } from 'typeorm';
-import { User } from './user';
-import { Message } from './message';
-import { Base } from './base';
+import { User,Message,Base } from '.'
 
 export enum ChatType {
   PRIVATE = 'private',
@@ -13,7 +11,6 @@ export class Chat extends Base {
   @Column()
   name: string;
 
-  @Column()
   @ManyToOne(()  => User,(user) => user.id)
   ownerId: number;
   

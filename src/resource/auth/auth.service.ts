@@ -5,11 +5,13 @@ import { JwtService } from '@nestjs/jwt';
 import { Repository } from 'typeorm';
 
 import { IAuthEnticationResponse } from './models/autencitation-response';
-import { SecretCode,User } from 'src/entities';
+import { SecretCode,User } from '../../database/entities';
 import { createRandomCode } from 'src/helpers';
 import { ConfigService } from '@nestjs/config';
-import { CodeDTO } from './dto/chech-code.dto';
+import { CodeDTO } from './dto/check-code.dto';
 import { IJWTConfig } from 'src/models';
+
+
 @Injectable()
 export class AuthService {
   private jwtConfig: IJWTConfig;
