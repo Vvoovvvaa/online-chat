@@ -5,12 +5,13 @@ import { UsersService } from './user.service';
 import { MediaFiles,User } from '../../database/entities'
 import { UserController } from './user.controller';
 import { AuthModule } from '../auth/auth.module';
+import { S3Module } from '../chat/modules/s3/s3.module';
 
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([MediaFiles, User,]),
-    AuthModule,
+    AuthModule,S3Module
   ],
   controllers: [UserController],
   providers: [UsersService],

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { AuthUser } from 'src/decorator/auth-user.decorator';
@@ -15,7 +15,7 @@ export class ActionsController {
 
   @UseInterceptors(FilesInterceptor('photo'))
   @Post()
-  async createPost(@AuthUser() user: IRequestUser, @Body() dto: CreatePostDto, files?: Express.Multer.File[]) {
+  async createPost(@AuthUser() user: IRequestUser, @Body() dto: CreatePostDto, @UploadedFiles() files?: Express.Multer.File[]) {
     return this.actionservice.addPost(user.id, dto, files)
   }
 
