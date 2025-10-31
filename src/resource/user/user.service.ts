@@ -4,11 +4,9 @@ import { User } from 'src/database/entities';
 import { MediaFiles } from 'src/database/entities/media-files';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { PhotoValidator } from 'src/helpers/photos-validation.helper';
-import { FileHelper } from 'src/helpers/file-helper';
 import { UserIdDto } from './dto/user-id.dto';
 import {v4 as uuid} from 'uuid'
-import { S3Service } from '../chat/modules/s3/s3.service';
+import { S3Service } from '../../modules/s3/s3.service';
 
 @Injectable()
 export class UsersService {
@@ -36,14 +34,13 @@ export class UsersService {
 
     if (files) {
       for (let file of files) {
-        const validated = PhotoValidator.validator(file);
-        const type = validated.originalname.split('.').reverse()[0]
+        const type = file.originalname.split('.').reverse()[0]
         const filePath = `Vova/Post/${type}/${uuid()}_${file.originalname}`
         const photoEntity = this.mediaRepository.create({
           path: filePath,
-          size: validated.size
+          size: file.size
         })
-        await this.s3service.putObject(file.buffer,filePath,validated.mimetype)
+        await this.s3service.putObject(file.buffer,filePath,file.mimetype)
         user.mediaFiles.push(photoEntity)
       }
     }
@@ -51,8 +48,7 @@ export class UsersService {
     return this.userRepository.save(user)
   }
 
- async addFriend(userId: UserIdDto, friendId: number): Promise<User> {
-
+async addFriend(userId: UserIdDto, friendId: number): Promise<User> {
   const user = await this.userRepository.findOne({
     where: { id: userId.userId },
     relations: ['friends'],
@@ -71,6 +67,7 @@ export class UsersService {
 }
 
 
+
   async removeFriend(userId: number, frientId: number): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['friends'] })
     if (!user) throw new NotFoundException('user not found')
@@ -82,19 +79,23 @@ export class UsersService {
   }
 
 
-  async getFriends(requesterId: number, userId: number): Promise<User[]> {
-    const user = await this.userRepository.findOne({ where: { id: userId }, relations: ['friends'] });
+  async getFriends(targetUserId: number, requesterId: number): Promise<User[]> {
+    const targetUser = await this.userRepository.findOne({
+      where: { id: targetUserId },
+      relations: ['friends'],
+    });
 
-    if (!user) {
+    if (!targetUser) {
       throw new NotFoundException('User not found');
     }
 
-    if (user.id !== requesterId && user.isPrivate === 'private') {
+    if (targetUser.id !== requesterId && targetUser.isPrivate === 'private') {
       throw new ForbiddenException('User data is private');
     }
 
-    return user.friends;
+    return targetUser.friends;
   }
+
 
 
 
@@ -104,7 +105,7 @@ export class UsersService {
 
 
   async findOne(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } })
+    const user = await this.userRepository.findOne({ where: { id },relations:['friends','posts']})
 
     if (!user) {
       throw new NotFoundException('user not found')

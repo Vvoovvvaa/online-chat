@@ -18,7 +18,6 @@ export class S3Service {
 
 constructor(private readonly configService: ConfigService) {
   const awsConfig = this.configService.get<IAWSConfig>('CLOUDCONFIG');
-  console.log('AWS Config:', awsConfig);
 
   if (!awsConfig?.BUCKET) {
     throw new Error('Missing S3 bucket name in AWS_CONFIG');

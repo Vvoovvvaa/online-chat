@@ -24,7 +24,7 @@ import { CommentModule } from './resource/comment/comment.module';
 import { LikeService } from './resource/like/like.service';
 import { LikeController } from './resource/like/like.controller';
 import { LikeModule } from './resource/like/like.module';
-import { S3Module } from './resource/chat/modules/s3/s3.module';
+import { S3Module } from './modules/s3/s3.module';
 
 
 
@@ -45,7 +45,6 @@ import { S3Module } from './resource/chat/modules/s3/s3.module';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const dbConfig: IDBConfig = configService.get('DB_CONFIG') as IDBConfig;
-        const IAWSConfig: IAWSConfig = configService.get('IAWS_CONFIG') as IAWSConfig
         return {
           type: 'postgres',
           host: dbConfig.host,
@@ -54,7 +53,7 @@ import { S3Module } from './resource/chat/modules/s3/s3.module';
           password: dbConfig.password,
           database: dbConfig.database,
           entities: [User, SecretCode, Chat, Message, MediaFiles, Posts, Comments, Likes],
-          synchronize: true,
+          synchronize: false,
 
 
         };

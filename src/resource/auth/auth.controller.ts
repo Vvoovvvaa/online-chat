@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post, UseGuards } from '@nestjs/common';
 
 import { CreateAuthDTO } from './dto/auth-dto';
 import { CodeDTO } from './dto/check-code.dto';
@@ -8,10 +8,12 @@ import { AuthGuard } from '../../guards';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+  ) { }
 
   @Post()
-  async login (@Body() dto: CreateAuthDTO) {
+  async login(@Body() dto: CreateAuthDTO) {
     return this.authService.loginOrRegister(dto)
   }
 
@@ -20,5 +22,7 @@ export class AuthController {
   async confirm(@Body() dto: CodeDTO) {
     return this.authService.authentication(dto);
   }
+
   
 }
+

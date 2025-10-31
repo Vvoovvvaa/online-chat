@@ -15,7 +15,6 @@ export class UpdateUserDto{
     @Max(100)
     age?:number
 
-    @IsBoolean()
     @IsOptional()
     @IsEnum(Confidencial)
     isPrivate?:Confidencial

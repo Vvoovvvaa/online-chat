@@ -82,4 +82,5 @@ export class AuthService {
       message: 'Authentication successful',
     };
   }
+
 }

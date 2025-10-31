@@ -7,6 +7,7 @@ import { UsersService } from "./user.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { IdParamDto } from "src/dto/id-param";
 import { UserIdDto } from "./dto/user-id.dto";
+import { PhotoValidationPipe } from "src/modules/pipe/photo-validator";
 
 @UseGuards(AuthGuard)
 @Controller('users')
@@ -16,7 +17,7 @@ export class UserController {
 
   @UseInterceptors(FilesInterceptor('photo'))
   @Post()
-  async updateUser(@AuthUser() user: IRequestUser, @Body() dto: UpdateUserDto, @UploadedFiles() files?: Express.Multer.File[]) {
+  async updateUser(@AuthUser() user: IRequestUser, @Body() dto: UpdateUserDto, @UploadedFiles(PhotoValidationPipe) files?: Express.Multer.File[]) {
     return this.usersService.updateUser(user.id, dto, files)
   }
 
@@ -28,25 +29,28 @@ export class UserController {
 
 
   @Get(':id')
-  async findOneUser(@Param() param : IdParamDto) {
-    return this.usersService.findOne(+param)
+  async findOneUser(@Param() param: IdParamDto) {
+    return this.usersService.findOne(Number(param.id))
   }
 
 
   @Post('friends/:id')
-  async addFriends(@Body() dto:UserIdDto, @Param() param: IdParamDto) {
-    return this.usersService.addFriend(dto, +param)
+  async addFriends(@Body() dto: UserIdDto, @Param() param: IdParamDto) {
+    return this.usersService.addFriend(dto, Number(param.id))
   }
 
 
-  @Get('friends')
-  async getFriends(@AuthUser() requester : IRequestUser,userId: number ) {
-    return this.usersService.getFriends(requester.id, userId)
-  }
 
+  @Get('friends/:id')
+  async getFriends(
+    @AuthUser() user: IRequestUser,
+    @Param() param: IdParamDto
+  ) {
+    return this.usersService.getFriends(+param.id, user.id);
+  }
 
   @Delete('friends/:id')
-  async removeFriends(@AuthUser() user : IRequestUser, @Param() param: IdParamDto) {
+  async removeFriends(@AuthUser() user: IRequestUser, @Param() param: IdParamDto) {
     return this.usersService.removeFriend(user.id, +param)
   }
 

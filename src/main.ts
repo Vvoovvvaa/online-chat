@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { CustomWsAdapter } from './resource/chat/modules/ws.adapter';
+import { CustomWsAdapter } from './modules/ws.adapter';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './filters/exeption-filter';
 import {DocumentBuilder,SwaggerModule} from '@nestjs/swagger'

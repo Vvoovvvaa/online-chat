@@ -7,6 +7,7 @@ import type { IRequestUser } from '../chat/types/request-user';
 import { ActionsService } from './actions.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { IdParamDto } from 'src/dto/id-param';
+import { PhotoValidationPipe } from 'src/modules/pipe/photo-validator';
 
 @UseGuards(AuthGuard)
 @Controller('posts')
@@ -15,7 +16,7 @@ export class ActionsController {
 
   @UseInterceptors(FilesInterceptor('photo'))
   @Post()
-  async createPost(@AuthUser() user: IRequestUser, @Body() dto: CreatePostDto, @UploadedFiles() files?: Express.Multer.File[]) {
+  async createPost(@AuthUser() user: IRequestUser, @Body() dto: CreatePostDto, @UploadedFiles(PhotoValidationPipe) files?: Express.Multer.File[]) {
     return this.actionservice.addPost(user.id, dto, files)
   }
 

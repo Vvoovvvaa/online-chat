@@ -4,8 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { MediaFiles, Posts, User } from '../../database/entities';
 import { CreatePostDto } from './dto/create-post.dto';
-import { PhotoValidator, FileHelper } from 'src/helpers';
-import { S3Service } from 'src/resource/chat/modules/s3/s3.service';
+import { PhotoValidator } from 'src/helpers';
+import { S3Service } from 'src/modules/s3/s3.service';
 import { v4 as uuid } from 'uuid'
 @Injectable()
 export class ActionsService {
@@ -28,15 +28,14 @@ export class ActionsService {
     if (files) {
       post.mediaFiles = []
       for (let file of files) {
-        const validated = PhotoValidator.validator(file);
-        const type = validated.originalname.split('.').reverse()[0]
+        const type = file.originalname.split('.').reverse()[0]
         const filePath = `Vova/Post/${type}/${uuid()}_${file.originalname}`
         const photoEntity = this.mediaRepository.create({
 
           path: filePath,
-          size: validated.size
+          size: file.size
         })
-        await this.s3service.putObject(file.buffer, filePath, validated.mimetype)
+        await this.s3service.putObject(file.buffer, filePath, file.mimetype)
         post.mediaFiles.push(photoEntity)
       }
     }
