@@ -5,17 +5,20 @@ import { accauntStatus } from '../enums/user-accaunt-status';
 
 @Entity("User")
 export class User extends Base {
-  @Column()
-  name: string;
+  @Column({nullable:true})
+  firstName: string;
 
   @Column({ nullable: true })
-  LastName?: string;
+  lastName?: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true,nullable:true })
   phone: string;
 
   @Column({ nullable: true })
   age: number;
+
+  @Column({unique: true,nullable:true})
+  email:string
 
   @ManyToMany(() => Chat, (chat) => chat.members)
   chats: Chat[];

@@ -34,7 +34,7 @@ export class AuthService {
     let user = await this.userRepository.findOne({ where: { phone },order: { id: 'DESC'} });
     if (!user) {
 
-      user = this.userRepository.create({ phone, name });
+      user = this.userRepository.create({ phone, firstName: name });
       await this.userRepository.save(user);
 
       const security = this.userSecurityRepository.create({ user })
@@ -68,7 +68,7 @@ export class AuthService {
     }
 
     const tempToken = this.jwtService.sign(
-      { sub: user.id, phone: user.phone, name: user.name, temp: true }, {
+      { sub: user.id, phone: user.phone, name: user.firstName, temp: true }, {
       secret: this.jwtConfig.tempSecret,
       expiresIn: '10m',
     },
@@ -156,7 +156,7 @@ export class AuthService {
     await this.userRepository.save(user1);
 
     const accessToken = this.jwtService.sign(
-      { sub: user1.id, phone: user1.phone, name: user1.name },
+      { sub: user1.id, phone: user1.phone, name: user1.firstName },
       { secret: this.jwtConfig.secret, expiresIn: '1d' }
     );
 

@@ -28,8 +28,8 @@ export class UsersService {
     }
 
     user.isPrivate = dto.isPrivate ?? user.isPrivate
-    user.name = dto.name ?? user.name;
-    user.LastName = dto.LastName ?? user.LastName;
+    user.firstName = dto.name ?? user.firstName;
+    user.lastName = dto.LastName ?? user.lastName;
     user.age = dto.age ?? user.age;
 
     if (files) {

@@ -25,11 +25,20 @@ import { LikeService } from './resource/like/like.service';
 import { LikeController } from './resource/like/like.controller';
 import { LikeModule } from './resource/like/like.module';
 import { S3Module } from './modules/s3/s3.module';
+import { GoogleStrategy } from './strategy/google.strategy';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './strategy/jwt.strategy';
 
 
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([SecretCode,User,UserSecurity]),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: '1h' },
+    }),
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads/'),
       serveRoot: '/public/',
@@ -38,7 +47,7 @@ import { S3Module } from './modules/s3/s3.module';
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: validationSchema,
-      load: [jwtConfig, dbconfig,cloudconifd],
+      load: [jwtConfig, dbconfig, cloudconifd],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -52,7 +61,7 @@ import { S3Module } from './modules/s3/s3.module';
           username: dbConfig.username,
           password: dbConfig.password,
           database: dbConfig.database,
-          entities: [User, SecretCode, Chat, Message, MediaFiles, Posts, Comments, Likes,UserSecurity],
+          entities: [User, SecretCode, Chat, Message, MediaFiles, Posts, Comments, Likes, UserSecurity],
           synchronize: true,
 
 
@@ -69,7 +78,7 @@ import { S3Module } from './modules/s3/s3.module';
     S3Module
   ],
   controllers: [AppController, UserController, ActionsController, CommentController, LikeController],
-  providers: [AppService, ActionsService, CommentService, LikeService],
+  providers: [AppService, ActionsService, CommentService, LikeService, GoogleStrategy, JwtStrategy],
 
 })
 export class AppModule { }
