@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 
-import { SecretCode, User } from '../../database/entities';
+import { SecretCode, User, UserSecurity } from '../../database/entities';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../../guards';
@@ -12,7 +12,7 @@ import { AuthGuard } from '../../guards';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, SecretCode]),
+    TypeOrmModule.forFeature([User, SecretCode,UserSecurity]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

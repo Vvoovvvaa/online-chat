@@ -4,6 +4,8 @@ import { CreateAuthDTO } from './dto/auth-dto';
 import { CodeDTO } from './dto/check-code.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '../../guards';
+import { AuthUser } from 'src/decorator/auth-user.decorator';
+import type { IRequestUser } from '../chat/types/request-user';
 
 
 @Controller('auth')
@@ -19,8 +21,8 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @Post('login')
-  async confirm(@Body() dto: CodeDTO) {
-    return this.authService.authentication(dto);
+  async confirm(@Body() dto: CodeDTO,@AuthUser() user:IRequestUser) {
+    return this.authService.authentication(user.id,dto);
   }
 
   

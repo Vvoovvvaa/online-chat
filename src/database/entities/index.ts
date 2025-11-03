@@ -7,4 +7,5 @@ export * from './posts'
 export * from './media-files'
 export * from './comments'
 export * from './likes'
+export * from './user-security'
 

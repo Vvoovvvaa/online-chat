@@ -1,21 +1,21 @@
-import { Entity, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
-import { Chat,Message,Base,MediaFiles,Posts,Comments, Likes } from '.';
+import { Entity, Column, OneToMany, ManyToMany, JoinTable, OneToOne} from 'typeorm';
+import { Chat, Message, Base, MediaFiles, Posts, Comments, Likes, UserSecurity } from '.';
 import { Confidencial } from '../enums/private-account-enum';
-
+import { accauntStatus } from '../enums/user-accaunt-status';
 
 @Entity("User")
 export class User extends Base {
   @Column()
   name: string;
 
-  @Column({nullable:true})
-  LastName?: string
+  @Column({ nullable: true })
+  LastName?: string;
 
   @Column({ unique: true })
   phone: string;
 
-  @Column({nullable:true})
-  age:number
+  @Column({ nullable: true })
+  age: number;
 
   @ManyToMany(() => Chat, (chat) => chat.members)
   chats: Chat[];
@@ -26,8 +26,8 @@ export class User extends Base {
   secretCodes: any;
 
   @ManyToMany(() => User)
-  @JoinTable({name:'Friends'})
-  friends:User[]
+  @JoinTable({ name: 'Friends' })
+  friends: User[];
 
   @ManyToMany(() => MediaFiles, { cascade: true })
   @JoinTable({
@@ -35,10 +35,10 @@ export class User extends Base {
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'media_file_id', referencedColumnName: 'id' },
   })
-  mediaFiles: MediaFiles[]
+  mediaFiles: MediaFiles[];
 
-  @Column({default:Confidencial.PUBLIC})
-  isPrivate?:Confidencial
+  @Column({ default: Confidencial.PUBLIC })
+  isPrivate?: Confidencial;
 
   @OneToMany(() => Posts, (post) => post.user)
   posts: Posts[];
@@ -49,6 +49,9 @@ export class User extends Base {
   @OneToMany(() => Likes, (like) => like.user)
   likes: Likes[];
 
+  @Column({ default: accauntStatus.ACTIVE })
+  accountStatus: accauntStatus;
 
-
+  @OneToOne(() => UserSecurity, (security) => security.user)
+  security: UserSecurity;
 }

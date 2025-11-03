@@ -9,7 +9,7 @@ export class CreateAuthDTO{
     @MaxLength(15)
     name:string
 
-    @IsString()
-    @MaxLength(20)
-    lastName:string
+    // @IsString()
+    // @MaxLength(20)
+    // lastName:string
 }

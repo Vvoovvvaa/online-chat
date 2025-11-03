@@ -10,7 +10,7 @@ import { AppService } from './app.service';
 import { jwtConfig, dbconfig, cloudconifd } from './configs';
 import { validationSchema } from './validation/validation-schema';
 import { ChatModule } from './resource/chat/chat.module';
-import { Chat, Message, Posts, SecretCode, User, MediaFiles, Comments, Likes } from './database/entities';
+import { Chat, Message, Posts, SecretCode, User, MediaFiles, Comments, Likes, UserSecurity } from './database/entities';
 import { IAWSConfig, IDBConfig } from './models';
 import { AuthModule } from './resource/auth/auth.module';
 import { UserController } from './resource/user/user.controller';
@@ -52,8 +52,8 @@ import { S3Module } from './modules/s3/s3.module';
           username: dbConfig.username,
           password: dbConfig.password,
           database: dbConfig.database,
-          entities: [User, SecretCode, Chat, Message, MediaFiles, Posts, Comments, Likes],
-          synchronize: false,
+          entities: [User, SecretCode, Chat, Message, MediaFiles, Posts, Comments, Likes,UserSecurity],
+          synchronize: true,
 
 
         };
