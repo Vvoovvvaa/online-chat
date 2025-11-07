@@ -31,6 +31,7 @@ export class UsersService {
     user.firstName = dto.name ?? user.firstName;
     user.lastName = dto.LastName ?? user.lastName;
     user.age = dto.age ?? user.age;
+    user.email = dto.email ?? user.email
 
     if (files) {
       for (let file of files) {

@@ -11,7 +11,7 @@ import { jwtConfig, dbconfig, cloudconifd } from './configs';
 import { validationSchema } from './validation/validation-schema';
 import { ChatModule } from './resource/chat/chat.module';
 import { Chat, Message, Posts, SecretCode, User, MediaFiles, Comments, Likes, UserSecurity } from './database/entities';
-import { IAWSConfig, IDBConfig } from './models';
+import { IDBConfig } from './models';
 import { AuthModule } from './resource/auth/auth.module';
 import { UserController } from './resource/user/user.controller';
 import { UserModule } from './resource/user/user.module';
@@ -25,9 +25,9 @@ import { LikeService } from './resource/like/like.service';
 import { LikeController } from './resource/like/like.controller';
 import { LikeModule } from './resource/like/like.module';
 import { S3Module } from './modules/s3/s3.module';
-import { GoogleStrategy } from './strategy/google.strategy';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategy/jwt.strategy';
+import { JwtStrategy,GoogleStrategy} from './strategy'
+
 
 
 
@@ -75,7 +75,8 @@ import { JwtStrategy } from './strategy/jwt.strategy';
     ActionsModule,
     CommentModule,
     LikeModule,
-    S3Module
+    S3Module,
+    
   ],
   controllers: [AppController, UserController, ActionsController, CommentController, LikeController],
   providers: [AppService, ActionsService, CommentService, LikeService, GoogleStrategy, JwtStrategy],

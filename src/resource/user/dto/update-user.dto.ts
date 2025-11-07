@@ -1,4 +1,4 @@
-import { MinLength,IsString, IsNumber, Min, Max, IsBoolean, IsOptional, IsEnum } from "class-validator";
+import { MinLength,IsString, IsNumber, Min, Max, IsBoolean, IsOptional, IsEnum, IsEmail } from "class-validator";
 import { Confidencial } from "src/database/enums/private-account-enum";
 
 export class UpdateUserDto{
@@ -18,6 +18,9 @@ export class UpdateUserDto{
     @IsOptional()
     @IsEnum(Confidencial)
     isPrivate?:Confidencial
+
+    @IsEmail()
+    email?:string
 
 
 

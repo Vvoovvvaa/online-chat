@@ -4,9 +4,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { createRandomCode } from './helpers';
-import { SecretCode, User } from './database/entities';
-import { UserSecurity } from './database/entities';
-import { accauntStatus } from './database/enums/user-accaunt-status';
+import { SecretCode, User,UserSecurity } from './database/entities';
+import { accauntStatus } from './database/enums';
 
 @Injectable()
 export class AppService {
@@ -72,7 +71,7 @@ export class AppService {
     const jwt = this.jwtService.sign(payload, { expiresIn: '1d' });
 
     return {
-      message: 'User logged in via Google',
+      message: 'User logged in Google',
       user,
       code,
       jwt,
