@@ -1,20 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { config } from 'dotenv';
+import { ConfigService } from '@nestjs/config';
+import { IgoogleConfig } from 'src/models';
 
 config();
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-    constructor() {
+    constructor(private readonly configservice:ConfigService) {
+        const googlConfig = configservice.get<IgoogleConfig>("GOOGLECONFIG")
+        if(!googlConfig){
+            throw new NotFoundException("the file google config is missing")
+        }
         super({
-            clientID: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-            callbackURL: process.env.GOOGLE_CALLBACK_URL!,
+            clientID:googlConfig.clientID!,
+            clientSecret: googlConfig.clientSecret!,
+            callbackURL: googlConfig.callbackURL!,
             scope: ['profile', 'email'],
-            passReqToCallback: false, 
-
+            
         });
     }
 

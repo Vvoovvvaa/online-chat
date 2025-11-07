@@ -7,7 +7,7 @@ import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { jwtConfig, dbconfig, cloudconifd } from './configs';
+import { jwtConfig, dbconfig, cloudconifd, googleconfig } from './configs';
 import { validationSchema } from './validation/validation-schema';
 import { ChatModule } from './resource/chat/chat.module';
 import { Chat, Message, Posts, SecretCode, User, MediaFiles, Comments, Likes, UserSecurity } from './database/entities';
@@ -47,7 +47,7 @@ import { JwtStrategy,GoogleStrategy} from './strategy'
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: validationSchema,
-      load: [jwtConfig, dbconfig, cloudconifd],
+      load: [jwtConfig, dbconfig, cloudconifd,googleconfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
