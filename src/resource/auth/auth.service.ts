@@ -30,11 +30,11 @@ export class AuthService {
   }
 
   async loginOrRegister(dto: CreateAuthDTO): Promise<IAuthEnticationResponse> {
-    const { phone, name } = dto;
-    let user = await this.userRepository.findOne({ where: { phone },order: { id: 'DESC'} });
+    const { phone, name,email } = dto;
+    let user = await this.userRepository.findOne({ where: { phone,email },order: { id: 'DESC'} });
     if (!user) {
 
-      user = this.userRepository.create({ phone, firstName: name });
+      user = this.userRepository.create({ phone,email, firstName: name });
       await this.userRepository.save(user);
 
       const security = this.userSecurityRepository.create({ user })

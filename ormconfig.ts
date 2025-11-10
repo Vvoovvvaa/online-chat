@@ -16,4 +16,4 @@ export const dataSource = new DataSource({
   entities: Object.values(ENTITIES) as Function[], 
   migrationsTableName: 'mindgrid_migrations',
   migrations: [path.join(__dirname, 'src/database/migrations/*.ts')],
-});
+})
