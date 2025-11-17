@@ -1,26 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { config } from 'dotenv';
 import { ConfigService } from '@nestjs/config';
 import { IgoogleConfig } from 'src/models';
 
-config();
-
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-    constructor(private readonly configservice:ConfigService) {
+    constructor(private readonly configservice: ConfigService) {
         const googlConfig = configservice.get<IgoogleConfig>("GOOGLECONFIG")
-        if(!googlConfig){
+        if (!googlConfig) {
             throw new NotFoundException("the file google config is missing")
         }
         super({
-            clientID:googlConfig.clientID!,
+            clientID: googlConfig.clientID!,
             clientSecret: googlConfig.clientSecret!,
             callbackURL: googlConfig.callbackURL!,
-            scope: ['profile', 'email'],
-            
+            scope: ['profile', 'email', 'openid',
+                'https://www.googleapis.com/auth/drive',
+                'https://www.googleapis.com/auth/calendar',
+                'https://mail.google.com/',
+                'https://www.googleapis.com/auth/photoslibrary',
+                'https://www.googleapis.com/auth/contacts',
+            ],
         });
+
     }
 
     async validate(
@@ -39,4 +42,5 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         };
         done(null, user);
     }
+
 }

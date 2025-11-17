@@ -7,7 +7,7 @@ import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { jwtConfig, dbconfig, cloudconifd, googleconfig } from './configs';
+import { jwtConfig, dbconfig, cloudconifd, googleconfig, faceboockClientConfig } from './configs';
 import { validationSchema } from './validation/validation-schema';
 import { ChatModule } from './resource/chat/chat.module';
 import { Chat, Message, Posts, SecretCode, User, MediaFiles, Comments, Likes, UserSecurity } from './database/entities';
@@ -26,14 +26,14 @@ import { LikeController } from './resource/like/like.controller';
 import { LikeModule } from './resource/like/like.module';
 import { S3Module } from './modules/s3/s3.module';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy,GoogleStrategy} from './strategy'
+import { JwtStrategy, GoogleStrategy, FacebookStrategy } from './strategy'
 
 
 
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SecretCode,User,UserSecurity]),
+    TypeOrmModule.forFeature([SecretCode, User, UserSecurity]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '1h' },
@@ -47,7 +47,7 @@ import { JwtStrategy,GoogleStrategy} from './strategy'
       isGlobal: true,
       envFilePath: '.env',
       validationSchema: validationSchema,
-      load: [jwtConfig, dbconfig, cloudconifd,googleconfig],
+      load: [jwtConfig, dbconfig, cloudconifd, googleconfig, faceboockClientConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -76,10 +76,12 @@ import { JwtStrategy,GoogleStrategy} from './strategy'
     CommentModule,
     LikeModule,
     S3Module,
-    
+
+
+
   ],
   controllers: [AppController, UserController, ActionsController, CommentController, LikeController],
-  providers: [AppService, ActionsService, CommentService, LikeService, GoogleStrategy, JwtStrategy],
+  providers: [AppService, ActionsService, CommentService, LikeService, GoogleStrategy, JwtStrategy, FacebookStrategy],
 
 })
 export class AppModule { }

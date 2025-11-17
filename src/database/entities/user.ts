@@ -20,6 +20,9 @@ export class User extends Base {
   @Column({unique: true,nullable:true})
   email:string
 
+  @Column({nullable:true,unique:true})
+  facebookId:string
+
   @ManyToMany(() => Chat, (chat) => chat.members)
   chats: Chat[];
 

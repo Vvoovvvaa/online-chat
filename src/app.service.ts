@@ -1,14 +1,16 @@
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { User,UserSecurity } from './database/entities';
+import { UserSecurity } from './database/entities';
+import { User } from './database/entities';
 import { accauntStatus } from './database/enums';
 
 @Injectable()
 export class AppService {
   constructor(
+
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
 
@@ -16,48 +18,59 @@ export class AppService {
     private readonly securityRepository: Repository<UserSecurity>,
 
     private readonly jwtService: JwtService,
-  ) {}
+  ) { }
 
- async googleLogin(req) {
-  if (!req.user) {
-    return { message: 'No user from Google' };
-  }
+  async oauthLogin(req) {
+    if (!req.user) {
+      return { message: 'No user from OAuth provider' };
+    }
 
-  const { email, given_name: firstName, family_name: lastName } = req.user;
+    const { facebookId, email, firstName, lastName,openid } = req.user;
 
-  let user = await this.userRepository.findOne({
-    where: { email }, 
-    relations: ['security'],
-  });
+    let user: User | null = null;
 
-  if (!user) {
-    user = this.userRepository.create({
+    if (facebookId) {
+      user = await this.userRepository.findOne({
+        where: { facebookId },
+        relations: ['security'],
+      });
+    }
+
+    if (!user && email) {
+      user = await this.userRepository.findOne({
+        where: { email },
+        relations: ['security'],
+      });
+    }
+
+    if (!user) {
+      user = this.userRepository.create({
+        firstName,
+        lastName,
+        email: email || null,
+        facebookId: facebookId || null,
+        accountStatus: accauntStatus.ACTIVE,
+      });
+      await this.userRepository.save(user);
+
+      const security = this.securityRepository.create({ user });
+      await this.securityRepository.save(security);
+      user.security = security;
+    }
+
+    const payload = {
+      sub: user.id,
+      email,
       firstName,
       lastName,
-      email,
-      accountStatus: accauntStatus.ACTIVE,
-    });
-    await this.userRepository.save(user);
+    };
+    const jwt = this.jwtService.sign(payload, { expiresIn: '1d' });
 
-    const security = this.securityRepository.create({ user });
-    await this.securityRepository.save(security);
-
-    user.security = security;
+    return {
+      message: 'User logged in via OAuth provider',
+      user,
+      jwt,
+      openid
+    };
   }
-
-  const payload = {
-    sub: user.id,
-    email,
-    firstName: user.firstName,
-    lastName: user.lastName,
-  };
-
-  const jwt = this.jwtService.sign(payload, { expiresIn: '1d' });
-
-  return {
-    message: 'User logged in via Google',
-    user,
-    jwt,
-  };
-}
 }
